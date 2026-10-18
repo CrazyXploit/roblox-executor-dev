@@ -44,15 +44,28 @@ jobs:
             -Wl,-soname,libexecutor.so \
             -pthread
 
+      - name: Build injector
+        run: |
+          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang \
+            -O2 inject.c -o injector -static
+
+      - name: Verify binaries
+        run: |
+          ls -la libexecutor.so injector
+          file libexecutor.so injector
+
       - name: Pack module
         run: |
           mkdir -p module/bin
           cp module.prop module/
           cp libexecutor.so module/bin/
+          cp injector module/bin/
+          chmod 755 module/bin/injector
           cd module
           zip -r ../executor-module.zip .
           cd ..
-          ls -la executor-module.zip module/bin/
+          echo "=== zip contents ==="
+          unzip -l executor-module.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
