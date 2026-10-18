@@ -9,7 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install NDK
         uses: nttld/setup-ndk@v1
@@ -28,7 +29,8 @@ jobs:
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-24 \
             -DCMAKE_BUILD_TYPE=Release \
-            -DLUAU_BUILD_CLI=OFF -DLUAU_BUILD_TESTS=OFF
+            -DLUAU_BUILD_CLI=OFF \
+            -DLUAU_BUILD_TESTS=OFF
           make -j$(nproc)
 
       - name: Build executor .so
@@ -36,24 +38,24 @@ jobs:
           $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang \
             -shared -fPIC -O2 host.c \
             -Iluau/VM/include -Iluau/Compiler/include \
-            -Lluau/build-android -lLuau.VM -lLuau.Compiler \
+            -Lluau/build-android \
+            -lLuau.VM -lLuau.Compiler \
             -o libexecutor.so \
-            -Wl,-soname,libexecutor.so
-
-      - name: Build injector
-        run: |
-          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang \
-            -O2 inject.c -o injector -static
+            -Wl,-soname,libexecutor.so \
+            -pthread
 
       - name: Pack module
         run: |
-          mkdir -p module
-          cp module.prop module/
           mkdir -p module/bin
-          cp libexecutor.so injector module/bin/
+          cp module.prop module/
+          cp libexecutor.so module/bin/
+          cd module
+          zip -r ../executor-module.zip .
+          cd ..
+          ls -la executor-module.zip module/bin/
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: executor-module
-          path: module/
+          path: executor-module.zip
