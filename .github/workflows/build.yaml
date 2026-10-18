@@ -46,7 +46,7 @@ jobs:
 
       - name: Build injector
         run: |
-          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang \
+          $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang \
             -O2 inject.c -o injector -static
 
       - name: Verify binaries
