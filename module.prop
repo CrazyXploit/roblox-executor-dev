@@ -1,0 +1,6 @@
+id=robloxexecutor
+name=Roblox Executor Dev
+version=1.0
+versionCode=1
+author=Dotbhai
+description=Dev-only ptrace injector. No boot hooks. Manual trigger only.
